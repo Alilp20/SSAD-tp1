@@ -59,6 +59,7 @@ const SignUp = () => {
           uid: user.uid,
           email: email,
           userName: userName,
+          password: password
         }),
       });
 
