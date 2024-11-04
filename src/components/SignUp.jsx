@@ -7,7 +7,7 @@ import { auth, db } from '../firebase';
 const SignUp = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [userName, setUserName] = useState(''); // New state for userName
+  const [userName, setUserName] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
@@ -45,15 +45,31 @@ const SignUp = () => {
       // Save user data to Firestore
       await setDoc(doc(db, 'users', user.uid), {
         email: email,
-        userName: userName, // Save userName
+        userName: userName,
         lastActive: new Date(),
       });
+
+      // Send user data to Node.js server
+      const response = await fetch('http://localhost:3000/api/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          uid: user.uid,
+          email: email,
+          userName: userName,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save user data to server');
+      }
 
       setSuccess('User created successfully! Redirecting to login...');
       setTimeout(() => {
         navigate('/login');
       }, 2000);
-
     } catch (error) {
       handleAuthError(error);
       setLoading(false);
