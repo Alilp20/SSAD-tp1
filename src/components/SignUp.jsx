@@ -19,7 +19,6 @@ const SignUp = () => {
     setSuccess('');
     setLoading(true);
 
-    // Basic validations
     if (!validateEmail(email)) {
       setError('Please enter a valid email address.');
       setLoading(false);
@@ -42,14 +41,13 @@ const SignUp = () => {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
 
-      // Save user data to Firestore
+      
       await setDoc(doc(db, 'users', user.uid), {
         email: email,
         userName: userName,
         lastActive: new Date(),
       });
 
-      // Send user data to Node.js server
       const response = await fetch('http://localhost:3000/api/users', {
         method: 'POST',
         headers: {

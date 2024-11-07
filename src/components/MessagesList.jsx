@@ -7,7 +7,7 @@ const MessagesList = ({ messages = [], onSendMessage, currentUserId }) => {
   const [showEncryptionMethods, setShowEncryptionMethods] = useState(false);
   const [encryptionMethod, setEncryptionMethod] = useState("Mirroring");
   const [decryptedMessages, setDecryptedMessages] = useState({});
-  const [activeMenuId, setActiveMenuId] = useState(null); // Track the active message for the menu
+  const [activeMenuId, setActiveMenuId] = useState(null);
 
   const handleSend = (e) => {
     e.preventDefault();
@@ -38,9 +38,11 @@ const MessagesList = ({ messages = [], onSendMessage, currentUserId }) => {
       case "Caesar":
         return caesarDecrypt(message, 3); // cesar with a=3
       case "Affine":
-        return affineDecrypt(message, 5, 8); //  affine with a=5, b=8
+        return affineDecrypt(message, 4, 8); //  affine with a=5, b=8
       case "Shift":
         return caesarDecrypt(message, 1); // Shift with 1
+      case "Steganography":
+        return decodeSteganography(message, codebook2);
       default:
         return message;
     }
@@ -58,11 +60,13 @@ const MessagesList = ({ messages = [], onSendMessage, currentUserId }) => {
         case "Mirroring":
           return mirrorEncrypt(message, 2); // Splitting each message into chunks of 2 characters and then reverse them
         case "Caesar":
-          return caesarEncrypt(message, 3); // Example shift of 3
+          return caesarEncrypt(message, 3); // Caesar of 3
         case "Affine":
-          return affineEncrypt(message, 5, 8); // Example values for a=5, b=8
+          return affineEncrypt(message, 4, 8); // a=5, b=8
         case "Shift":
           return caesarEncrypt(message, 1); // Shift of 1
+        case "Steganography":
+          return steganography(message, codebook);
         default:
           return message; // Default to plain text if invalid method
       }
@@ -104,7 +108,7 @@ const MessagesList = ({ messages = [], onSendMessage, currentUserId }) => {
       "with method: Mirroring"
     );
 
-    // Remove padding (assuming 3 characters for both start and end)
+    // Remove padding 3 characters for both start and end
     const strippedMessage = encryptedMessage.slice(3, -3);
 
     // Split the message into chunks based on the key
@@ -152,20 +156,24 @@ const MessagesList = ({ messages = [], onSendMessage, currentUserId }) => {
       })
       .join("");
   };
-  
 
   function affineEncrypt(message, a, b) {
     const characterSet =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:,.<>?' ";
+    console.log("encrypt affine character length = " + characterSet.length);
     const m = characterSet.length; // Length of the character set
-  
+
     // Validate 'a' is coprime to 'm'
     if (!isValidKey(a, m)) {
       throw new Error(
-        "The value of 'a' must be coprime to " + m + " and within the range of 1-" + (m - 1) + "."
+        "The value of 'a' must be coprime to " +
+          m +
+          " and within the range of 1-" +
+          (m - 1) +
+          "."
       );
     }
-  
+
     return message
       .split("")
       .map((char) => {
@@ -184,12 +192,15 @@ const MessagesList = ({ messages = [], onSendMessage, currentUserId }) => {
   function affineDecrypt(message, a, b) {
     const characterSet =
       "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:,.<>?' ";
+    console.log("decrypt affine character length = " + characterSet.length);
     const m = characterSet.length; // Length of the character set
     const aInverse = modInverse(a, m);
 
+    console.log("mod inverse of a = "+aInverse);
+
     if (aInverse === undefined) {
       throw new Error(
-        "No modular inverse found for 'a'. Ensure 'a' is coprime to 94."
+        "No modular inverse found for 'a'. Ensure 'a' is coprime to 88."
       );
     }
 
@@ -208,10 +219,87 @@ const MessagesList = ({ messages = [], onSendMessage, currentUserId }) => {
       .join("");
   }
 
+  function steganography(message, codebook) {
+    const trimmedMessage = message.trim(); // Remove leading and trailing spaces
+    const words = trimmedMessage.match(/\b\w+\b/g) || []; // Split on word boundaries
+    console.log(words);
+    const encodedMessage = words
+      .map((word) => codebook[word] || word)
+      .join(" ");
+    return encodedMessage;
+  }
+
+  function decodeSteganography(encodedMessage, codebook) {
+    const words = encodedMessage.split(" ");
+    const lookup = Object.fromEntries(Object.entries(codebook));
+
+    const decodedWords = words.map((word) => {
+      const decodedWord = lookup[word] || word;
+      console.log(`Decoding word '${word}' to '${decodedWord}'`);
+      return decodedWord;
+    });
+
+    return decodedWords.join(" ");
+  }
+
+  const codebook = {
+    "the": "apple",
+    "of": "banana",
+    "and": "cherry",
+    "to": "date",
+    "a": "elderberry",
+    "in": "fig",
+    "is": "grape",
+    "it": "honeydew",
+    "that": "kiwi",
+    "for": "lemon",
+    "with": "lime",
+    "as": "mango",
+    "on": "nectarine",
+    "by": "olive",
+    "at": "papaya",
+    "or": "quince",
+    "have": "raspberry",
+    "from": "strawberry",
+    "this": "tangerine",
+    "be": "watermelon",
+    "which": "xigua",
+    "one": "yellow melon",
+    "you": "zucchini",
+  };
+  const codebook2 = {
+    "apple": "the",
+    "banana": "of",
+    "cherry": "and",
+    "date": "to",
+    "elderberry": "a",
+    "fig": "in",
+    "grape": "is",
+    "honeydew": "it",
+    "kiwi": "that",
+    "lemon": "for",
+    "lime": "with",
+    "mango": "as",
+    "nectarine": "on",
+    "olive": "by",
+    "papaya": "at",
+    "quince": "or",
+    "raspberry": "have",
+    "strawberry": "from",
+    "tangerine": "this",
+    "watermelon": "be",
+    "xigua": "which",
+    "yellow": "one",
+    "zucchini": "you",
+  };
+
   function modInverse(a, m) {
     a = a % m;
     for (let x = 1; x < m; x++) {
-      if ((a * x) % m === 1) return x;
+      if ((a * x) % m === 1){
+        console.log("x ="+x);
+        return x
+      };
     }
     return undefined; // Return undefined instead of throwing an error for easier handling
   }
@@ -255,8 +343,6 @@ const MessagesList = ({ messages = [], onSendMessage, currentUserId }) => {
   };
 
   const sortedMessages = messages.sort((a, b) => a.timestamp - b.timestamp);
-
-  console.log("Sorted messages:", sortedMessages);
   return (
     <div className="flex flex-col w-full h-full">
       <div className="flex-grow overflow-y-auto p-4">
@@ -299,6 +385,7 @@ const MessagesList = ({ messages = [], onSendMessage, currentUserId }) => {
                       "Caesar",
                       "Affine",
                       "Shift",
+                      "Steganography",
                       "Show Original",
                     ].map((method) => (
                       <li
@@ -306,7 +393,7 @@ const MessagesList = ({ messages = [], onSendMessage, currentUserId }) => {
                         className="py-1 px-2 cursor-pointer hover:bg-gray-700"
                         onClick={() => handleDecryptClick(msg, method)}
                       >
-                        Decrypt with {method}
+                        {method}
                       </li>
                     ))}
                   </ul>
@@ -361,6 +448,12 @@ const MessagesList = ({ messages = [], onSendMessage, currentUserId }) => {
                 onClick={() => selectEncryptionMethod("Shift")}
               >
                 Shift
+              </div>
+              <div
+                className="py-1 px-2 cursor-pointer transition ease-in-out hover:bg-gray-700 text-white hover:text-gray-200"
+                onClick={() => selectEncryptionMethod("Steganography")}
+              >
+                Steganography
               </div>
             </div>
           )}

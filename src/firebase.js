@@ -18,7 +18,7 @@ const firebaseConfig = {
 
 // Initialize Firebase
 initializeApp(firebaseConfig);
-const analytics = getAnalytics(); // No need to pass app, it's globally available now
+const analytics = getAnalytics();
 export const auth = getAuth();
 export const db = getFirestore();
 export const storage = getStorage();

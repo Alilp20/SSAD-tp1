@@ -1,4 +1,3 @@
-// Conversation.jsx
 import React, { useEffect, useState } from 'react';
 import ConversationItem from './ConversationItem';
 import { db } from '../firebase';

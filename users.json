@@ -1,1 +1,14 @@
-[]
+[
+  {
+    "uid": "q3Djc5i7mNTHt532Ov4v8ATcp6c2",
+    "email": "user1@test.com",
+    "userName": "user1",
+    "password": "abbaaa"
+  },
+  {
+    "uid": "cvWMKzjKFoMQcp6aJVyI2dwNUJV2",
+    "email": "user2@test.com",
+    "userName": "user2",
+    "password": "abdaaa"
+  }
+]

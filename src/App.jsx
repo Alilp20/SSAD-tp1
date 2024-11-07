@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-d
 import SignUp from './components/SignUp';
 import Login from './components/Login';
 import Chat from './components/Chat';
+import Profile from './components/Profile';
 import { useAuth } from './hooks/UseAuth'; // Custom hook for authentication
 
 const App = () => {
@@ -18,6 +19,7 @@ const App = () => {
         {/* Public Routes */}
         <Route path="/signup" element={<SignUp />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/profile" element={<Profile />} />
         
         {/* Private Route */}
         <Route path="/chat" element={user ? <Chat /> : <Navigate to="/login" />} />
